@@ -1,5 +1,4 @@
 import mongoose, { isValidObjectId } from "mongoose";
-import { User } from "../models/user.model.js";
 import { Subscription } from "../models/subscription.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
@@ -41,14 +40,15 @@ const toggleSubscription = asyncHandler(async (req, res) => {
 });
 
 const getUserChannelSubscribers = asyncHandler(async (req, res) => {
-  const { channelId } = req.params;
-  if (!isValidObjectId(channelId)) {
+  const { subscriberId } = req.params;
+
+  if (!isValidObjectId(subscriberId)) {
     throw new ApiError(400, "Invalid channel ID");
   }
 
   const channelList = await Subscription.aggregate([
     {
-      $match: { channel: new mongoose.Types.ObjectId(channelId) },
+      $match: { channel: new mongoose.Types.ObjectId(subscriberId) },
     },
     {
       $lookup: {
@@ -89,6 +89,7 @@ const getSubscribedChannels = asyncHandler(async (req, res) => {
         foreignField: "_id",
         localField: "channel",
         as: "channel",
+        pipeline: [{ $project: { fullName: 1, username: 1, avatar: 1 } }],
       },
     },
   ]);
