@@ -60,7 +60,7 @@ const getAllVideos = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(200, { videos }, "All videos fetched Successfully");
+    .json(new ApiResponse(200, { videos }, "All videos fetched Successfully"));
 });
 
 const publishAVideo = asyncHandler(async (req, res) => {
@@ -88,9 +88,9 @@ const publishAVideo = asyncHandler(async (req, res) => {
     throw new ApiError(500, "Failed to upload thumbnail to Cloudinary");
   }
 
-  const video = Video.create({
+  const video = await Video.create({
     videoFile: videoFile?.url,
-    thumbnail: thumbnail?.url,
+    thumbnail: thumbnailFile?.url,
     title,
     description,
     owner: req.user?._id,
@@ -140,11 +140,7 @@ const updateVideo = asyncHandler(async (req, res) => {
     throw new ApiError(403, "Unauthorized to update this video");
   }
 
-  const deleteOldThumbnail = await deleteInCloudinary(video.thumbnail);
-  if (deleteOldThumbnail.resule !== "ok") {
-    throw new ApiError(500, "Failed to delete old thumbnail from Cloudinary");
-  }
-  const thumbnailLocalPath = req.files?.thumbnail[0]?.path;
+  const thumbnailLocalPath = req.file.path;
   if (!thumbnailLocalPath) {
     throw new ApiError(400, "Thumbnail file is required");
   }
@@ -170,6 +166,13 @@ const updateVideo = asyncHandler(async (req, res) => {
 
   if (!videoToUpdate) {
     throw new ApiError(500, "Error while updating video");
+  }
+
+  const oldThumbnail = video.thumbnail;
+  const deleteOldThumbnail = await deleteInCloudinary(oldThumbnail);
+
+  if (deleteOldThumbnail.result !== "ok") {
+    throw new ApiError(500, "Failed to delete old thumbnail from Cloudinary");
   }
 
   return res

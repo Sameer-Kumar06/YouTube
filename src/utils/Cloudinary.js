@@ -32,23 +32,36 @@ const deleteInCloudinary = async (fileUrl) => {
     if (!fileUrl) {
       return null;
     }
+
+    // Extract the public ID from the URL
     const publicId = extractPublicId(fileUrl);
-    if (publicId) {
+
+    // If public ID extraction fails, return null
+    if (!publicId) {
       return null;
     }
 
+    // Determine the resource type based on file extension
     let resourceType = "image";
-    if (fileUrl.match(/\.(mp4|mkv|mov|avi|wmv|flv|webm|m4v|3gp)$/)) {
+    if (
+      fileUrl
+        .toLowerCase()
+        .match(/\.(mp4|MP4|mkv|mov|avi|wmv|flv|webm|m4v|3gp)$/)
+    ) {
       resourceType = "video";
-    } else if (fileUrl.match(/\.(mp3|wav)$/)) {
+    } else if (fileUrl.toLowerCase().match(/\.(mp3|wav)$/)) {
       resourceType = "raw";
     }
 
+    // Call Cloudinary's destroy function with the public ID and resource type
     const response = await cloudinary.uploader.destroy(publicId, {
       resource_type: resourceType,
     });
+
+    // Return Cloudinary's response
     return response;
   } catch (error) {
+    console.error("Error deleting file in Cloudinary:", error);
     return null;
   }
 };
