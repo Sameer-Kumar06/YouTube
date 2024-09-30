@@ -122,7 +122,7 @@ const updateComment = asyncHandler(async (req, res) => {
     { new: true }
   );
 
-  if (!updateComment) {
+  if (!updatedComment) {
     throw new ApiError(500, "Failed to update comment");
   }
   return res
@@ -130,7 +130,7 @@ const updateComment = asyncHandler(async (req, res) => {
     .json(
       new ApiResponse(
         200,
-        { comment: updateComment },
+        { comment: updatedComment },
         "Comment updated successfully"
       )
     );
