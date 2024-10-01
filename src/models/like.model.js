@@ -5,9 +5,8 @@ const likeSchema = new Schema(
     video: {
       type: Schema.Types.ObjectId,
       ref: "Video",
-      required: true,
     },
-    Comment: {
+    comment: {
       type: Schema.Types.ObjectId,
       ref: "Comment",
     },
@@ -23,4 +22,4 @@ const likeSchema = new Schema(
   { timestamps: true }
 );
 
-export const Like = mongoose.model("Like", { likeSchema });
+export const Like = mongoose.model("Like", likeSchema);
